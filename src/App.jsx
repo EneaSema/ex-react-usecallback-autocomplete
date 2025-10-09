@@ -1,4 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+function debounce(callback, delay) {
+  let timer;
+  return (value) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+}
 
 export default function App() {
   const [query, setQuery] = useState(``);
@@ -13,12 +22,16 @@ export default function App() {
       fetch(`http://localhost:3333/products?search=${query}`)
         .then((resp) => resp.json())
         .then((data) => setProducts(data));
+      console.log("API");
     } catch (error) {
       console.error(err);
     }
   };
+
+  const debounceHandleSearch = useCallback(debounce(handleSearch, 300), []);
+
   useEffect(() => {
-    handleSearch(query);
+    debounceHandleSearch(query);
   }, [query]);
 
   return (
