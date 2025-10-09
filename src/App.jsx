@@ -1,35 +1,42 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-function App() {
+export default function App() {
   const [query, setQuery] = useState(``);
   const [products, setProducts] = useState([]);
+
+  const handleSearch = () => {
+    if (!query.trim()) {
+      setProducts([]);
+      return;
+    }
+    try {
+      fetch(`http://localhost:3333/products?search=${query}`)
+        .then((resp) => resp.json())
+        .then((data) => setProducts(data));
+    } catch (error) {
+      console.error(err);
+    }
+  };
   useEffect(() => {
-    fetch(`http://localhost:3333/products?search=${query}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setProducts(data);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+    handleSearch(query);
+  }, [query]);
+
   return (
     <>
       <h1>EX - Autocomplete</h1>
+      <p>Cerca il prodotto</p>
       <input
         type="text"
-        title="Seleziona il prodotto"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      {products && (
-        <ul>
-          {products.map((p, i) => {
-            <li key={i}>{p}</li>;
-          })}
-        </ul>
+      {products.length > 0 && (
+        <div className="card">
+          {products.map((p) => (
+            <p key={p.id}>{p.name}</p>
+          ))}
+        </div>
       )}
     </>
   );
 }
-
-export default App;
